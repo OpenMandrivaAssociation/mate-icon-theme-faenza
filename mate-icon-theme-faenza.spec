@@ -2,54 +2,101 @@
 
 Summary:	MATE icon theme faenza
 Name:		mate-icon-theme-faenza
-Version:	1.14.0
+Version:	1.18.1
 Release:	1
+License:	GPLv2+
 Group:		Graphical desktop/Other
-License:	GPLv2
-Url:		http://mate-desktop.org
-Source0:	http://pub.mate-desktop.org/releases/%{url_ver}/%{name}-%{version}.tar.xz
+Url:		https://mate-desktop.org
+Source0:	https://pub.mate-desktop.org/releases/%{url_ver}/%{name}-%{version}.tar.xz
 BuildArch:	noarch
+
 BuildRequires:	icon-naming-utils
+BuildRequires:	intltool
 BuildRequires:	mate-common
 
+Requires:	hicolor-icon-theme
+
 %description
-This icon theme uses Faenza and Faience icon themes by ~Tiheum and
-some icons customized for MATE by Rowen Stipe.
+The MATE Desktop Environment is the continuation of GNOME 2. It provides an
+intuitive and attractive desktop environment using traditional metaphors for
+Linux and other Unix-like operating systems.
+
+MATE is under active development to add support for new technologies while
+preserving a traditional desktop experience.
+
+This package provides a theme using Faenza and Faience icon themes by ~Tiheum
+and some icons customized for MATE by Rowen Stipe.
+
+%files
+%doc COPYING AUTHORS NEWS README
+%dir %{_iconsdir}/matefaenza
+%{_iconsdir}/matefaenza/actions
+%{_iconsdir}/matefaenza/apps
+%{_iconsdir}/matefaenza/categories
+%{_iconsdir}/matefaenza/devices
+%{_iconsdir}/matefaenza/emblems
+%{_iconsdir}/matefaenza/extras
+%{_iconsdir}/matefaenza/mimetypes
+%{_iconsdir}/matefaenza/places
+%{_iconsdir}/matefaenza/status
+%{_iconsdir}/matefaenza/stock
+%{_iconsdir}/matefaenza/index.theme
+%ghost %{_iconsdir}/matefaenza/icon-theme.cache
+%dir %{_iconsdir}/matefaenzagray
+%{_iconsdir}/matefaenzagray/index.theme
+%ghost %{_iconsdir}/matefaenzagray/icon-theme.cache
+%dir %{_iconsdir}/matefaenzadark
+%{_iconsdir}/matefaenzadark/actions
+%{_iconsdir}/matefaenzadark/apps
+%{_iconsdir}/matefaenzadark/categories
+%{_iconsdir}/matefaenzadark/devices
+%{_iconsdir}/matefaenzadark/extras
+%{_iconsdir}/matefaenzadark/places
+%{_iconsdir}/matefaenzadark/status
+%{_iconsdir}/matefaenzadark/stock
+%{_iconsdir}/matefaenzadark/index.theme
+%ghost %{_iconsdir}/matefaenzadark/icon-theme.cache
+%{_var}/lib/rpm/filetriggers/gtk-icon-cache-mate-faenza.*
+
+#---------------------------------------------------------------------------
 
 %prep
 %setup -q
-NOCONFIGURE=1 ./autogen.sh
 
 %build
+#NOCONFIGURE=1 ./autogen.sh
 %configure \
-	--enable-icon-mapping
+	--enable-icon-mapping \
+	%{nil}
 
 %install
-make install DESTDIR=%{buildroot} INSTALL="install -p"
+%makeinstall_std
+
+touch %{buildroot}%{_iconsdir}/matefaenza/icon-theme.cache
+touch %{buildroot}%{_iconsdir}/matefaenzagray/icon-theme.cache
+touch %{buildroot}%{_iconsdir}/matefaenzadark/icon-theme.cache
+
+# automatic gtk icon cache update on rpm installs/removals
+# (see http://wiki.mandriva.com/en/Rpm_filetriggers)
+install -d %{buildroot}%{_var}/lib/rpm/filetriggers
+cat > %{buildroot}%{_var}/lib/rpm/filetriggers/gtk-icon-cache-mate-faenza.filter << EOF
+^./usr/share/icons/matefaenza/
+^./usr/share/icons/matefaenzagray/
+^./usr/share/icons/matefaenzadark/
+EOF
+cat > %{buildroot}%{_var}/lib/rpm/filetriggers/gtk-icon-cache-mate-faenza.script << EOF
+#!/bin/sh
+if [ -x /usr/bin/gtk-update-icon-cache ]; then
+  /usr/bin/gtk-update-icon-cache --force --quiet /usr/share/icons/matefaenza
+  /usr/bin/gtk-update-icon-cache --force --quiet /usr/share/icons/matefaenzagray
+  /usr/bin/gtk-update-icon-cache --force --quiet /usr/share/icons/matefaenzadark
+fi
+EOF
+chmod 0755 %{buildroot}%{_var}/lib/rpm/filetriggers/gtk-icon-cache-mate-faenza.script
 
 %post
-/bin/touch --no-create %{_datadir}/icons/matefaenza &>/dev/null || :
-/bin/touch --no-create %{_datadir}/icons/matefaenzagray &>/dev/null || :
-/bin/touch --no-create %{_datadir}/icons/matefaenzadark &>/dev/null || :
+%update_icon_cache matefaenza matefaenzagray matefaenzadark
 
 %postun
-if [ $1 -eq 0 ] ; then
-    /bin/touch --no-create %{_datadir}/icons/matefaenza &>/dev/null
-    /bin/touch --no-create %{_datadir}/icons/matefaenzagray &>/dev/null
-    /bin/touch --no-create %{_datadir}/icons/matefaenzadark &>/dev/null
-    /usr/bin/gtk-update-icon-cache %{_datadir}/icons/matefaenza &>/dev/null || :
-    /usr/bin/gtk-update-icon-cache %{_datadir}/icons/matefaenzagray &>/dev/null || :
-    /usr/bin/gtk-update-icon-cache %{_datadir}/icons/matefaenzadark &>/dev/null || :
-fi
-
-%posttrans
-/usr/bin/gtk-update-icon-cache %{_datadir}/icons/matefaenza &>/dev/null || :
-/usr/bin/gtk-update-icon-cache %{_datadir}/icons/matefaenzagray &>/dev/null || :
-/usr/bin/gtk-update-icon-cache %{_datadir}/icons/matefaenzadark &>/dev/null || :
-
-%files
-%doc COPYING AUTHORS
-%{_datadir}/icons/matefaenza/
-%{_datadir}/icons/matefaenzagray/
-%{_datadir}/icons/matefaenzadark/
+%clean_icon_cache matefaenza matefaenzagray matefaenzadark
 
