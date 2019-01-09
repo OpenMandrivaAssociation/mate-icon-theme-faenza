@@ -71,7 +71,7 @@ and some icons customized for MATE by Rowen Stipe.
 	%{nil}
 
 %install
-%makeinstall_std
+%make_install
 
 touch %{buildroot}%{_iconsdir}/matefaenza/icon-theme.cache
 touch %{buildroot}%{_iconsdir}/matefaenzagray/icon-theme.cache
