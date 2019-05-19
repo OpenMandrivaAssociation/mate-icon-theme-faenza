@@ -1,3 +1,5 @@
+# NOTE: mate-icon-theme-faenza has not been ported to MATE 1.22+
+
 %define url_ver %(echo %{version}|cut -d. -f1,2)
 
 Summary:	MATE icon theme faenza
